@@ -1,0 +1,67 @@
+# ==========================================
+# OONDANG - Root .gitignore
+# ==========================================
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment Variables & Secrets (CRITICAL: Never commit credentials)
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Dependencies
+node_modules/
+frontend/node_modules/
+.pnp
+.pnp.js
+
+# Build Outputs & Bundles
+dist/
+dist-ssr/
+frontend/dist/
+frontend/dist-ssr/
+build/
+*.local
+
+# Logs & Debugging
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# Firebase CLI cache & runtime states
+.firebase/
+
+# Editor & IDE settings
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/*
+!.vscode/extensions.json
+frontend/.vscode/*
+!frontend/.vscode/extensions.json
+
+# Temporary & Cache Directories
+tmp/
+temp/
+scratch/
+.cache/

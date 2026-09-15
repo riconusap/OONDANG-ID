@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isProfileOwner(profileId) {
+      return isAuthenticated() &&
+        request.auth.uid == get(/databases/$(database)/documents/weddingProfiles/$(profileId)).data.ownerId;
+    }
+
+    // 1. User Profiles
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // 2. Wedding Profiles
+    match /weddingProfiles/{profileId} {
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow read, update, delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+
+      // 2.1 Subkoleksi Requirements
+      match /requirements/{reqId} {
+        allow read, write: if isProfileOwner(profileId);
+      }
+
+      // 2.2 Subkoleksi Vendors & Embedded Payments
+      match /vendors/{vendorId} {
+        allow read, create, update: if isProfileOwner(profileId);
+        // Guard: Item yang di-lock (Undangan Digital - oondang.id) tidak boleh dihapus
+        allow delete: if isProfileOwner(profileId) && resource.data.isLocked != true;
+      }
+    }
+
+    // 3. Phase 2: Undangan Digital (invitations)
+    match /invitations/{subdomain} {
+      allow read: if true;
+      allow write: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+
+      match /guests/{guestId} {
+        allow read, write: if isAuthenticated() &&
+          get(/databases/$(database)/documents/invitations/$(subdomain)).data.ownerId == request.auth.uid;
+        allow create: if true;
+      }
+
+      match /wishes/{wishId} {
+        allow read, create: if true;
+        allow delete: if isAuthenticated() &&
+          get(/databases/$(database)/documents/invitations/$(subdomain)).data.ownerId == request.auth.uid;
+      }
+    }
+  }
+}
