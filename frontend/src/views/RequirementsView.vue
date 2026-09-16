@@ -45,15 +45,22 @@ const itemToDelete = ref<RequirementItem | null>(null)
 
 let unsubscribe: (() => void) | null = null
 
-function setupRequirementsSubscription() {
+async function setupRequirementsSubscription() {
   if (unsubscribe) {
     unsubscribe()
     unsubscribe = null
   }
 
+  isLoading.value = true
+
+  try {
+    await authStore.waitUntilReady()
+  } catch (err) {
+    console.error('Auth ready error:', err)
+  }
+
   const profileId = authStore.profile?.id
   if (profileId) {
-    isLoading.value = true
     unsubscribe = subscribeRequirements(
       profileId,
       (realtimeItems) => {
@@ -63,11 +70,17 @@ function setupRequirementsSubscription() {
       (err) => {
         console.warn('Gagal sinkronisasi data realtime berkas, beralih ke data lokal:', err)
         isLoading.value = false
-        loadMockRequirements()
+        if (import.meta.env.VITE_USE_MOCK !== 'false') {
+          loadMockRequirements()
+        }
       }
     )
   } else {
-    loadMockRequirements()
+    if (authStore.token === 'mock-jwt-token-wedding-catin' || import.meta.env.VITE_USE_MOCK !== 'false') {
+      loadMockRequirements()
+    } else {
+      isLoading.value = false
+    }
   }
 }
 
@@ -427,7 +440,7 @@ onUnmounted(() => {
               <button
                 v-if="!item.is_default"
                 type="button"
-                class="p-1.5 text-ink-light hover:text-red-700 rounded-lg hover:bg-red-50 transition-colors tap-target cursor-pointer"
+                class="p-1.5 inline-flex items-center justify-center text-ink-light hover:text-red-700 rounded-lg hover:bg-red-50 transition-colors tap-target cursor-pointer"
                 title="Hapus berkas kustom ini"
                 @click="confirmDelete(item)"
                 aria-label="Hapus berkas kustom"

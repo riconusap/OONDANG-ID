@@ -58,9 +58,6 @@ onUnmounted(() => {
           class="h-9 sm:h-10 w-auto object-contain mix-blend-multiply transition-opacity group-hover:opacity-85"
         />
       </router-link>
-      <span class="hidden sm:inline-block text-xs px-2 py-0.5 rounded bg-surface-subtle border border-border text-ink-muted">
-        MVP Phase 1
-      </span>
     </div>
 
     <!-- Right Actions / Profile Menu -->
@@ -81,10 +78,20 @@ onUnmounted(() => {
         </div>
         <div class="hidden sm:block text-left">
           <p class="font-semibold text-ink leading-tight truncate max-w-[140px]">
-            {{ authStore.user?.name || (authStore.profile?.groom_name ? `${authStore.profile.groom_name} & ${authStore.profile.bride_name}` : 'Dimas Prasetyo') }}
+            <template v-if="!authStore.isAuthReady">
+              <span class="inline-block h-3 w-20 bg-stone-200 rounded animate-pulse"></span>
+            </template>
+            <template v-else>
+              {{ authStore.user?.name || (authStore.profile?.groom_name ? `${authStore.profile.groom_name} & ${authStore.profile.bride_name}` : 'Pengguna Baru') }}
+            </template>
           </p>
           <p class="text-[10px] text-ink-muted leading-tight">
-            {{ authStore.profile?.location_city || 'Indonesia' }}
+            <template v-if="!authStore.isAuthReady">
+              <span class="inline-block h-2.5 w-16 bg-stone-200 rounded animate-pulse mt-0.5"></span>
+            </template>
+            <template v-else>
+              {{ authStore.profile?.location_city || 'Belum diatur' }}
+            </template>
           </p>
         </div>
         <svg
@@ -104,10 +111,10 @@ onUnmounted(() => {
       >
         <div class="px-4 py-2.5 border-b border-border text-left">
           <p class="text-xs font-semibold text-ink">
-            {{ authStore.user?.name || (authStore.profile?.groom_name ? `${authStore.profile.groom_name} & ${authStore.profile.bride_name}` : 'Dimas Prasetyo') }}
+            {{ authStore.user?.name || (authStore.profile?.groom_name ? `${authStore.profile.groom_name} & ${authStore.profile.bride_name}` : 'Pengguna Baru') }}
           </p>
           <p class="text-[11px] text-ink-muted truncate mt-0.5">
-            {{ authStore.user?.email || 'dimas.anissa@example.com' }}
+            {{ authStore.user?.email || 'Belum ada email' }}
           </p>
           <span v-if="authStore.profile?.event_date" class="inline-block mt-1.5 text-[10px] px-2 py-0.5 rounded bg-primary-light text-primary font-medium">
             Target: {{ authStore.profile.event_date }}

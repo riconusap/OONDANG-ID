@@ -66,7 +66,13 @@ function updateAggregatedOverview() {
   }
 }
 
+let dashboardTimeout: ReturnType<typeof setTimeout> | null = null
+
 function cleanupSubscriptions() {
+  if (dashboardTimeout) {
+    clearTimeout(dashboardTimeout)
+    dashboardTimeout = null
+  }
   if (unsubReqs) {
     unsubReqs()
     unsubReqs = null
@@ -77,30 +83,40 @@ function cleanupSubscriptions() {
   }
 }
 
-function setupDashboardSubscription() {
+async function setupDashboardSubscription() {
   cleanupSubscriptions()
+  isLoading.value = true
+
+  // Tunggu hingga sesi otentikasi dan profil pernikahan selesai diperiksa
+  await authStore.waitUntilReady()
 
   const profileId = authStore.profile?.id
   if (profileId) {
-    isLoading.value = true
     let reqsLoaded = false
     let vensLoaded = false
 
     const handleSubError = (err: any) => {
-      console.warn('Gagal sinkronisasi data realtime dashboard, beralih ke data lokal:', err)
-      reqsLoaded = true
-      vensLoaded = true
+      console.warn('Gagal sinkronisasi data realtime dashboard:', err)
+      updateAggregatedOverview()
       isLoading.value = false
-      loadMockDashboard()
     }
+
+    // Batas pengaman agar tidak menunggu selamanya jika koneksi lambat
+    dashboardTimeout = setTimeout(() => {
+      if (isLoading.value) {
+        updateAggregatedOverview()
+        isLoading.value = false
+      }
+    }, 5000)
 
     unsubReqs = subscribeRequirements(
       profileId,
       (items) => {
         realtimeReqs.value = items
         reqsLoaded = true
-        updateAggregatedOverview()
         if (reqsLoaded && vensLoaded) {
+          if (dashboardTimeout) clearTimeout(dashboardTimeout)
+          updateAggregatedOverview()
           isLoading.value = false
         }
       },
@@ -112,15 +128,22 @@ function setupDashboardSubscription() {
       (items) => {
         realtimeVendors.value = items
         vensLoaded = true
-        updateAggregatedOverview()
         if (reqsLoaded && vensLoaded) {
+          if (dashboardTimeout) clearTimeout(dashboardTimeout)
+          updateAggregatedOverview()
           isLoading.value = false
         }
       },
       handleSubError
     )
+  } else if (authStore.user) {
+    // Pengguna login namun belum mengisi profil acara pernikahan (onboarding)
+    isLoading.value = false
+  } else if (authStore.token === 'mock-jwt-token-wedding-catin' || import.meta.env.VITE_USE_MOCK !== 'false') {
+    // Mode demo lokal
+    await loadMockDashboard()
   } else {
-    loadMockDashboard()
+    isLoading.value = false
   }
 }
 
@@ -163,8 +186,8 @@ const budgetPercentage = computed(() => {
 
 watch(
   () => authStore.profile?.id,
-  (newId) => {
-    if (newId) {
+  (newId, oldId) => {
+    if (newId && newId !== oldId) {
       setupDashboardSubscription()
     }
   }
@@ -183,7 +206,7 @@ onUnmounted(() => {
   <AppLayout>
     <div class="space-y-6 max-w-5xl mx-auto text-left font-sans">
       <!-- Loading Skeleton (Antislop R-27) -->
-      <div v-if="isLoading" class="space-y-6">
+      <div v-if="isLoading" class="space-y-6 transition-opacity duration-200">
         <!-- Banner Skeleton -->
         <div class="bg-surface rounded-2xl p-6 sm:p-8 border border-border shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 animate-pulse">
           <div class="flex items-start gap-4 sm:gap-5 w-full">
@@ -241,6 +264,34 @@ onUnmounted(() => {
               <div class="h-3 bg-stone-200 rounded w-full"></div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- State Belum Onboarding untuk Pengguna Terdaftar -->
+      <div
+        v-else-if="!overview && authStore.user && !authStore.profile"
+        class="bg-surface rounded-2xl p-8 sm:p-10 border border-border text-center space-y-4 shadow-sm transition-opacity duration-200"
+      >
+        <div class="w-16 h-16 rounded-2xl bg-primary-light text-primary flex items-center justify-center mx-auto border border-primary/20">
+          <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div class="space-y-1.5">
+          <h2 class="text-xl sm:text-2xl font-bold text-ink">
+            Selamat Datang, {{ authStore.user.name }}
+          </h2>
+          <p class="text-xs sm:text-sm text-ink-muted max-w-md mx-auto leading-relaxed">
+            Ruang rencana pernikahan Anda telah aktif. Silakan lengkapi persiapan awal untuk mengaktifkan ceklist berkas resmi, rekanan vendor, dan pelacak keuangan.
+          </p>
+        </div>
+        <div class="pt-2">
+          <router-link to="/onboarding" class="inline-block">
+            <Button variant="primary">
+              <span>Mulai Persiapan Awal</span>
+              <span class="ml-1.5">&rarr;</span>
+            </Button>
+          </router-link>
         </div>
       </div>
 
@@ -421,9 +472,6 @@ onUnmounted(() => {
                 Akses instan ke seluruh modul persiapan pernikahan terintegrasi.
               </p>
             </div>
-            <span class="text-xs px-2.5 py-1 rounded bg-surface-subtle text-ink-muted border border-border font-medium">
-              Frontend-First Architecture (Sub-Fase 1)
-            </span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">

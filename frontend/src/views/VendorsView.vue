@@ -68,15 +68,22 @@ const categoryFilterOptions = computed(() => [
   ...categoryOptions,
 ])
 
-function setupVendorsSubscription() {
+async function setupVendorsSubscription() {
   if (unsubscribe) {
     unsubscribe()
     unsubscribe = null
   }
 
+  isLoading.value = true
+
+  try {
+    await authStore.waitUntilReady()
+  } catch (err) {
+    console.error('Auth ready error:', err)
+  }
+
   const profileId = authStore.profile?.id
   if (profileId) {
-    isLoading.value = true
     unsubscribe = subscribeVendors(
       profileId,
       (realtimeVendors) => {
@@ -86,11 +93,17 @@ function setupVendorsSubscription() {
       (err) => {
         console.warn('Gagal sinkronisasi data realtime vendor, beralih ke data lokal:', err)
         isLoading.value = false
-        loadMockVendors()
+        if (import.meta.env.VITE_USE_MOCK !== 'false') {
+          loadMockVendors()
+        }
       }
     )
   } else {
-    loadMockVendors()
+    if (authStore.token === 'mock-jwt-token-wedding-catin' || import.meta.env.VITE_USE_MOCK !== 'false') {
+      loadMockVendors()
+    } else {
+      isLoading.value = false
+    }
   }
 }
 
@@ -516,7 +529,7 @@ onUnmounted(() => {
                 <!-- Edit Button -->
                 <button
                   type="button"
-                  class="p-1 text-ink-muted hover:text-ink rounded hover:bg-surface-subtle transition-colors tap-target cursor-pointer"
+                  class="p-1 inline-flex items-center justify-center text-ink-light hover:text-primary rounded hover:bg-primary-light/30 transition-colors tap-target cursor-pointer"
                   title="Edit vendor"
                   @click="openEditModal(vendor)"
                   aria-label="Edit vendor"
@@ -529,7 +542,7 @@ onUnmounted(() => {
                 <!-- Delete Button -->
                 <button
                   type="button"
-                  class="p-1 text-ink-light hover:text-red-700 rounded hover:bg-red-50 transition-colors tap-target cursor-pointer"
+                  class="p-1 inline-flex items-center justify-center text-ink-light hover:text-red-700 rounded hover:bg-red-50 transition-colors tap-target cursor-pointer"
                   title="Hapus vendor"
                   @click="confirmDelete(vendor)"
                   aria-label="Hapus vendor"

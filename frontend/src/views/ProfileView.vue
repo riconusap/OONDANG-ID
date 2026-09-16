@@ -158,7 +158,7 @@ onMounted(async () => {
                 {{ groomName || 'Mempelai Pria' }} &amp; {{ brideName || 'Mempelai Wanita' }}
               </h2>
               <p class="text-xs text-ink-muted mt-0.5">
-                Akun Terdaftar: {{ authStore.user?.email || 'dimas.anissa@example.com' }}
+                Akun Terdaftar: {{ authStore.user?.email || 'Belum ada email' }}
               </p>
             </div>
           </div>

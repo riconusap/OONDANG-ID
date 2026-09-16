@@ -89,16 +89,5 @@ function isActive(path: string): boolean {
         </router-link>
       </nav>
     </div>
-
-    <!-- Phase 2 Teaser -->
-    <div class="p-3 bg-surface-subtle rounded-xl border border-border text-left">
-      <div class="flex items-center gap-2 text-xs font-semibold text-ink">
-        <span class="w-2 h-2 rounded-full bg-amber"></span>
-        Undangan Digital
-      </div>
-      <p class="mt-1 text-[11px] text-ink-muted leading-relaxed">
-        Fitur undangan website dan RSVP interaktif hadir pada Phase 2.
-      </p>
-    </div>
   </aside>
 </template>

@@ -110,7 +110,7 @@ function formatRupiah(amount: number): string {
 function initRecommendations() {
   const existingCustomIds = customItems.value.map((c) => c.id)
   selectedRecommendationIds.value = [
-    ...systemRecommendations.value.map((r) => r.id),
+    ...systemRecommendations.value.filter((r) => r.category !== 'finance').map((r) => r.id),
     ...existingCustomIds,
   ]
 }
@@ -659,7 +659,7 @@ onMounted(() => {
               <button
                 v-if="item.isCustom || item.id.startsWith('custom-')"
                 type="button"
-                class="p-2 text-ink-muted hover:text-red-600 rounded-lg hover:bg-stone-100 transition-colors tap-target shrink-0 self-center"
+                class="p-2 inline-flex items-center justify-center text-ink-muted hover:text-red-600 rounded-lg hover:bg-stone-100 transition-colors tap-target shrink-0 self-center"
                 title="Hapus persyaratan kustom ini"
                 aria-label="Hapus persyaratan kustom ini"
                 @click.stop="removeCustomItem(item.id)"
@@ -785,7 +785,7 @@ onMounted(() => {
               <button
                 v-if="item.isCustom || item.id.startsWith('custom-')"
                 type="button"
-                class="p-2 text-ink-muted hover:text-red-600 rounded-lg hover:bg-stone-100 transition-colors tap-target shrink-0 self-center"
+                class="p-2 inline-flex items-center justify-center text-ink-muted hover:text-red-600 rounded-lg hover:bg-stone-100 transition-colors tap-target shrink-0 self-center"
                 title="Hapus vendor kustom ini"
                 aria-label="Hapus vendor kustom ini"
                 @click.stop="removeCustomItem(item.id)"
@@ -857,7 +857,7 @@ onMounted(() => {
               <span class="text-xs font-bold text-ink block mb-2">
                 Modul yang Siap Diaktifkan Bersama Ceklist Rekomendasi:
               </span>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-center">
                 <div class="p-3 bg-surface rounded-xl border border-border">
                   <span class="text-xl font-extrabold text-ink">{{ selectedLegalCount }}</span>
                   <p class="text-[11px] text-ink-muted mt-0.5 font-medium">Berkas Legal</p>
@@ -866,11 +866,6 @@ onMounted(() => {
                 <div class="p-3 bg-surface rounded-xl border border-border">
                   <span class="text-xl font-extrabold text-ink">{{ selectedVendorCount }}</span>
                   <p class="text-[11px] text-ink-muted mt-0.5 font-medium">Vendor Acuan</p>
-                </div>
-
-                <div class="p-3 bg-surface rounded-xl border border-border">
-                  <span class="text-xl font-extrabold text-ink">{{ selectedFinanceCount }}</span>
-                  <p class="text-[11px] text-ink-muted mt-0.5 font-medium">Pos Keuangan</p>
                 </div>
               </div>
             </div>

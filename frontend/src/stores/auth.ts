@@ -17,15 +17,26 @@ import { seedRequirements } from '@/services/requirementService'
 import { seedDefaultLockedVendor } from '@/services/vendorService'
 import { getSystemRecommendations } from '@/services/onboardingRecommendations'
 
+let resolveAuthReady: () => void
+const authReadyPromise = new Promise<void>((resolve) => {
+  resolveAuthReady = resolve
+})
+
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<User | null>(null)
   const profile = ref<WeddingProfile | null>(null)
   const token = ref<string | null>(localStorage.getItem('oondang_token'))
   const isLoading = ref(false)
+  const isAuthReady = ref(false)
   const error = ref<string | null>(null)
 
   const isAuthenticated = computed(() => Boolean(token.value || user.value))
   const hasCompletedOnboarding = computed(() => Boolean(profile.value && profile.value.groom_name && profile.value.bride_name))
+
+  async function waitUntilReady(): Promise<void> {
+    if (isAuthReady.value) return
+    await authReadyPromise
+  }
 
   // Helper untuk mapping error Firebase ke pesan bahasa Indonesia yang ramah
   function formatFirebaseError(err: any): string {
@@ -116,6 +127,8 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Inisialisasi listener auth state Firebase
+  let initialAuthProcessed = false
+
   onAuthStateChanged(auth, async (fbUser) => {
     if (fbUser) {
       try {
@@ -128,6 +141,26 @@ export const useAuthStore = defineStore('auth', () => {
       } catch (e) {
         console.error('Error saat sinkronisasi user Firebase:', e)
       }
+    } else {
+      // Periksa apakah ada token mock pengguna demo di penyimpanan lokal
+      const storedToken = localStorage.getItem('oondang_token')
+      if (storedToken === 'mock-jwt-token-wedding-catin') {
+        try {
+          const res = await api.get<{ user: User; profile: WeddingProfile | null }>('/auth/me')
+          user.value = res.data.user
+          profile.value = res.data.profile
+        } catch (e) {
+          console.warn('Gagal memuat data user lokal:', e)
+        }
+      } else {
+        user.value = null
+        profile.value = null
+      }
+    }
+    isAuthReady.value = true
+    if (!initialAuthProcessed) {
+      initialAuthProcessed = true
+      resolveAuthReady()
     }
   })
 
@@ -390,9 +423,11 @@ export const useAuthStore = defineStore('auth', () => {
     profile,
     token,
     isLoading,
+    isAuthReady,
     error,
     isAuthenticated,
     hasCompletedOnboarding,
+    waitUntilReady,
     login,
     loginWithGoogle,
     register,

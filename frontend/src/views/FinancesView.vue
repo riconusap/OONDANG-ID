@@ -57,15 +57,22 @@ function formatRupiah(amount: number): string {
   }).format(amount)
 }
 
-function setupFinancesSubscription() {
+async function setupFinancesSubscription() {
   if (unsubscribe) {
     unsubscribe()
     unsubscribe = null
   }
 
+  isLoading.value = true
+
+  try {
+    await authStore.waitUntilReady()
+  } catch (err) {
+    console.error('Auth ready error:', err)
+  }
+
   const profileId = authStore.profile?.id
   if (profileId) {
-    isLoading.value = true
     const currentTarget = authStore.profile?.target_budget || targetBudgetInput.value || 150000000
     targetBudgetInput.value = currentTarget
 
@@ -95,11 +102,17 @@ function setupFinancesSubscription() {
       (err) => {
         console.warn('Gagal sinkronisasi data realtime keuangan, beralih ke data lokal:', err)
         isLoading.value = false
-        loadMockFinancesData()
+        if (import.meta.env.VITE_USE_MOCK !== 'false') {
+          loadMockFinancesData()
+        }
       }
     )
   } else {
-    loadMockFinancesData()
+    if (authStore.token === 'mock-jwt-token-wedding-catin' || import.meta.env.VITE_USE_MOCK !== 'false') {
+      loadMockFinancesData()
+    } else {
+      isLoading.value = false
+    }
   }
 }
 
@@ -558,7 +571,7 @@ onUnmounted(() => {
 
                       <button
                         type="button"
-                        class="p-1 text-ink-light hover:text-red-700 rounded hover:bg-red-50 transition-colors tap-target cursor-pointer"
+                        class="p-1 inline-flex items-center justify-center text-ink-light hover:text-red-700 rounded hover:bg-red-50 transition-colors tap-target cursor-pointer"
                         title="Hapus catatan termin"
                         @click="confirmDelete(pay)"
                         aria-label="Hapus termin"
