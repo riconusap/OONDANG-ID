@@ -93,11 +93,11 @@ const selectedVendorCount = computed(() => {
   return vendorRecommendations.value.filter((item) => selectedRecommendationIds.value.includes(item.id)).length
 })
 
-const selectedFinanceCount = computed(() => {
-  return allRecommendations.value.filter(
-    (item) => item.category === 'finance' && selectedRecommendationIds.value.includes(item.id)
-  ).length
-})
+// const selectedFinanceCount = computed(() => {
+//   return allRecommendations.value.filter(
+//     (item) => item.category === 'finance' && selectedRecommendationIds.value.includes(item.id)
+//   ).length
+// })
 
 function formatRupiah(amount: number): string {
   return new Intl.NumberFormat('id-ID', {
