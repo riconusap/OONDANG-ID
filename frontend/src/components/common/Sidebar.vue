@@ -32,6 +32,11 @@ const menuItems: NavMenuItem[] = [
     iconName: 'finances',
   },
   {
+    label: 'Undangan Digital',
+    to: '/invitations',
+    iconName: 'themes',
+  },
+  {
     label: 'Profil Acara',
     to: '/profile',
     iconName: 'settings',
@@ -80,6 +85,10 @@ function isActive(path: string): boolean {
           </svg>
           <svg v-else-if="item.iconName === 'finances'" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <svg v-else-if="item.iconName === 'themes'" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <rect width="20" height="16" x="2" y="4" rx="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           <svg v-else-if="item.iconName === 'settings'" class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

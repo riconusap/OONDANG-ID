@@ -51,6 +51,29 @@ const routes: RouteRecordRaw[] = [
     name: 'finances',
     component: FinancesView,
   },
+  {
+    path: '/invitations',
+    name: 'invitations',
+    component: () => import('@/views/invitation/InvitationIndexView.vue'),
+    meta: { requiresAuth: true, title: 'Undangan Digital' },
+  },
+  {
+    path: '/invitations/themes',
+    name: 'themes',
+    component: () => import('@/views/ThemeSelectionView.vue'),
+    meta: { requiresAuth: true, title: 'Pemilihan Tema Undangan' },
+  },
+  {
+    path: '/invitations/:subdomain/customize',
+    name: 'customize-invitation',
+    component: () => import('@/views/invitation/CustomizationView.vue'),
+    meta: { requiresAuth: true, title: 'Kostumisasi Undangan' },
+  },
+  {
+    path: '/invitation/theme-01',
+    name: 'invitation-theme-01',
+    component: () => import('@/views/invitation/Theme01View.vue'),
+  },
 ]
 
 const router = createRouter({

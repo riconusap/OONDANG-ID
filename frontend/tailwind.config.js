@@ -43,10 +43,19 @@ export default {
         border: {
           DEFAULT: '#EAE4DC',
           dark: '#332E29',
+        },
+        wedding: {
+          dark: '#111111',
+          gray: '#1f1f1f',
+          beige: '#eae5de',
+          gold: '#c0a062',
+          brown: '#4a4036',
         }
       },
       fontFamily: {
         sans: ['Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
+        'wedding-sans': ['Inter', 'sans-serif'],
+        'wedding-serif': ['Playfair Display', 'serif'],
       },
       borderRadius: {
         lg: '8px',

@@ -12,6 +12,7 @@ import {
   type User
 } from "firebase/auth";
 import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 // Firebase web app configuration for oondangid
 const firebaseConfig = {
@@ -31,6 +32,9 @@ export const auth: Auth = getAuth(app);
 
 // Initialize Cloud Firestore
 export const db: Firestore = getFirestore(app);
+
+// Initialize Firebase Storage
+export const storage: FirebaseStorage = getStorage(app);
 
 // Google Auth Provider configured for OAuth popup
 export const googleProvider: GoogleAuthProvider = new GoogleAuthProvider();
