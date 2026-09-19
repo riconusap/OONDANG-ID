@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import type { Invitation } from '@/types/invitation';
 
 const props = defineProps<{
+  guestName?: string;
   invitation?: Invitation | null
 }>();
 

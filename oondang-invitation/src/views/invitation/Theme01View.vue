@@ -16,7 +16,9 @@ import InvitationFooter from '@/components/invitation/theme-01/InvitationFooter.
 import ToastNotification from '@/components/common/ToastNotification.vue';
 
 const props = defineProps<{
-    isPreview?: boolean
+    isPreview?: boolean;
+    invitation?: any;
+    guestName?: string;
 }>();
 
 const route = useRoute();
@@ -26,7 +28,8 @@ const subdomain = route.params.subdomain as string;
 const showToast = ref(false);
 const toastMessage = ref('');
 
-const invitation = computed(() => invitationStore.currentInvitation);
+const invitation = computed(() => props.invitation || invitationStore.currentInvitation);
+const guestName = computed(() => props.guestName || 'Tamu Undangan');
 
 const audioRef = ref<HTMLAudioElement | null>(null);
 const isPlaying = ref(false);
@@ -110,7 +113,7 @@ onUnmounted(() => {
       <div class="w-full lg:w-[480px] flex justify-center z-10 shrink-0">
           <main :class="['w-full max-w-[480px] bg-wedding-dark relative overflow-x-hidden shadow-2xl pb-20', isPreview ? 'h-full overflow-y-auto' : 'min-h-screen']">
           
-          <CoverOverlay @open="handleOpen" :invitation="invitation" />
+          <CoverOverlay @open="handleOpen" :invitation="invitation" :guestName="guestName" />
           
           <HeroSection :invitation="invitation" />
           <QuoteSection :invitation="invitation" />

@@ -70,7 +70,7 @@ export const useInvitationStore = defineStore('invitation', () => {
       const { data, error: fetchError } = await supabase
         .from('invitations')
         .select('*')
-        .eq('id', subdomain)
+        .eq('subdomain', subdomain)
         .single();
         
       if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
@@ -152,7 +152,7 @@ export const useInvitationStore = defineStore('invitation', () => {
       const { data, error: fetchError } = await supabase
         .from('invitations')
         .select('id')
-        .eq('id', subdomain)
+        .eq('subdomain', subdomain)
         .maybeSingle();
         
       if (fetchError) throw fetchError;
@@ -184,13 +184,61 @@ export const useInvitationStore = defineStore('invitation', () => {
         .from('invitations')
         .insert({
           id: payload.subdomain,
+          subdomain: payload.subdomain,
           ownerId: payload.ownerId,
           themeId: payload.themeId,
           weddingProfileId: payload.weddingProfileId,
-          customTexts: {},
-          customImages: {},
-          stories: [],
-          gifts: [],
+          customTexts: {
+            coverSubtitle: "The Wedding of",
+            groomName: "DENI",
+            groomFullName: "DENI NURSALAM",
+            groomParents: "Putra Kedua dari\nBapak Eket & Ibu Herni Daningsih",
+            groomInstagram: "Deninursalamm",
+            brideName: "SOFIAH",
+            brideFullName: "SOFIAH RAMADHANI",
+            brideParents: "Putri Pertama dari\nBapak Deni & Ibu Eneng Eni",
+            brideInstagram: "Sofiahramadhaniii_",
+            eventDateStr: "Sabtu, 13 Juni 2026",
+            eventDateRaw: "2026-06-13T08:00:00",
+            heroQuote: "A great marriage is not when the 'perfect couple' comes together. It is when an 'imperfect couple' learns to enjoy their differences",
+            heroQuoteAuthor: "- Dave Meurer -",
+            profileIntroQuote: "Maha Suci Allah yang telah menciptakan makhluk-Nya berpasang-pasangan. Ya Allah semoga ridho-Mu tercurah mengiringi pernikahan kami:",
+            akadTitle: "Akad Nikah",
+            akadTime: "08:00 - 10:00 WIB",
+            akadAddressTitle: "KUA Kecamatan Setempat",
+            akadAddressDetails: "Jl. Pernikahan No. 123, Kota Bahagia, Provinsi Sejahtera 40123",
+            akadMapUrl: "https://maps.google.com",
+            resepsiTitle: "Resepsi",
+            resepsiTime: "11:00 - Selesai",
+            resepsiAddressTitle: "Gedung Serbaguna",
+            resepsiAddressDetails: "Jl. Kebahagiaan No. 456, Kota Bahagia, Provinsi Sejahtera 40123",
+            resepsiMapUrl: "https://maps.google.com",
+            galleryTitle: "Our Gallery",
+            gallerySubtitle: "Momen bahagia yang kami abadikan",
+            loveStoryTitle: "Our Love Story",
+            loveStorySubtitle: "Perjalanan cinta kami berdua",
+            giftTitle: 'Wedding Gift',
+            giftSubtitle: "Doa Restu Anda merupakan karunia yang sangat berarti bagi kami. Dan jika memberi adalah ungkapan tanda kasih Anda, Anda dapat memberi kado secara cashless.",
+            wishesTitle: 'Guestbook',
+            wishesSubtitle: "Berikan doa dan ucapan terbaik untuk kami"
+          },
+          customImages: {
+            cover_bg: 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000&auto=format&fit=crop',
+            hero_bg: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2000&auto=format&fit=crop',
+            groom_photo: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop',
+            bride_photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop',
+            gallery_1: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=800&auto=format&fit=crop',
+            gallery_2: 'https://images.unsplash.com/photo-1606800052052-a08af7148866?q=80&w=800&auto=format&fit=crop',
+            gallery_3: 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800&auto=format&fit=crop'
+          },
+          stories: [
+            { id: '1', title: 'Pertama Bertemu', date: 'Januari 2020', text: 'Pertemuan pertama kami di sebuah kafe kecil di sudut kota.' },
+            { id: '2', title: 'Lamaran', date: 'Desember 2023', text: 'Hari di mana kami memutuskan untuk melangkah ke jenjang yang lebih serius.' }
+          ],
+          gifts: [
+            { id: '1', type: 'BANK', name: 'BCA', accountNumber: '1234567890', accountName: 'Deni Nursalam' },
+            { id: '2', type: 'BANK', name: 'Mandiri', accountNumber: '0987654321', accountName: 'Sofiah Ramadhani' }
+          ],
           galleryUrls: [],
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
@@ -227,7 +275,7 @@ export const useInvitationStore = defineStore('invitation', () => {
       const { error: updateError } = await supabase
         .from('invitations')
         .update(updatePayload)
-        .eq('id', subdomain);
+        .eq('subdomain', subdomain);
         
       if (updateError) throw updateError;
       
@@ -248,6 +296,28 @@ export const useInvitationStore = defineStore('invitation', () => {
       return false;
     } finally {
       isLoading.value = false;
+    }
+  };
+
+  const uploadMedia = async (file: File, subdomain: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${subdomain}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('invitations-media')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('invitations-media')
+        .getPublicUrl(fileName);
+
+      return data.publicUrl;
+    } catch (err) {
+      console.error("Error uploading media:", err);
+      return null;
     }
   };
 
@@ -325,6 +395,7 @@ export const useInvitationStore = defineStore('invitation', () => {
     checkSubdomainAvailability,
     createInvitation,
     updateCustomization,
+    uploadMedia,
     updateLocalCustomText,
     updateLocalCustomImage,
     updateLocalMusicUrl,

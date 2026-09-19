@@ -3,7 +3,8 @@ import { ref, computed } from 'vue';
 import type { Invitation } from '@/types/invitation';
 
 const props = defineProps<{
-  invitation?: Invitation | null
+  invitation?: Invitation | null;
+  guestName?: string;
 }>();
 
 const isOpened = ref(false);
@@ -46,7 +47,7 @@ const salutation = computed(() => props.invitation?.customTexts?.coverSalutation
         
         <div class="mt-12 p-5 border border-zinc-500/50 rounded-xl bg-black/40 backdrop-blur-md">
             <p class="text-xs text-zinc-400 mb-1">{{ salutation }}</p>
-            <p class="font-bold text-lg text-white mb-6">Tamu Undangan</p>
+            <p class="font-bold text-lg text-white mb-6">{{ guestName || 'Tamu Undangan' }}</p>
             <button @click="openInvitation" class="w-full py-3 px-6 bg-transparent border border-white text-white rounded-lg hover:bg-white hover:text-black transition duration-300 flex items-center justify-center gap-2 font-medium text-sm">
                 <i class="fa-solid fa-envelope-open-text"></i> Buka Undangan
             </button>

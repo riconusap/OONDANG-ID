@@ -13,6 +13,8 @@ import InvitationFooter from '@/components/invitation/theme-02/InvitationFooter.
 import ToastNotification from '@/components/common/ToastNotification.vue';
 
 const props = defineProps<{
+    invitation?: any;
+    guestName?: string;
     isPreview?: boolean
 }>();
 
@@ -101,7 +103,7 @@ onUnmounted(() => {
       <div class="w-full lg:w-[480px] flex justify-center z-10 shrink-0">
           <main :class="['w-full max-w-[480px] bg-zinc-950 relative overflow-x-hidden shadow-2xl pb-20 border-l border-white/10', isPreview ? 'h-full overflow-y-auto' : 'min-h-screen']">
           
-          <CoverOverlay @open="handleOpen" :invitation="invitation" />
+          <CoverOverlay @open="handleOpen" :invitation="invitation" :guestName="guestName" />
           
           <HeroSection :invitation="invitation" />
           <ProfilesSection :invitation="invitation" />
