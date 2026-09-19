@@ -52,6 +52,35 @@ onMounted(async () => {
     
     if (!data) {
         isNotFound.value = true;
+    } else {
+        // Update SEO Meta Tags
+        const groom = data.customTexts?.groomName || 'Pria';
+        const bride = data.customTexts?.brideName || 'Wanita';
+        const title = `The Wedding of ${groom} & ${bride}`;
+        const description = `Kami mengundang Anda untuk hadir di acara pernikahan ${groom} dan ${bride}. Buka undangan digital untuk info lengkap.`;
+        const image = data.customImages?.cover_bg || 'https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop';
+        
+        document.title = title;
+        
+        const setMeta = (name: string, content: string, isProperty = false) => {
+            const attr = isProperty ? 'property' : 'name';
+            let meta = document.querySelector(`meta[${attr}="${name}"]`);
+            if (!meta) {
+                meta = document.createElement('meta');
+                meta.setAttribute(attr, name);
+                document.head.appendChild(meta);
+            }
+            meta.setAttribute('content', content);
+        };
+
+        setMeta('title', title);
+        setMeta('description', description);
+        setMeta('og:title', title, true);
+        setMeta('og:description', description, true);
+        setMeta('og:image', image, true);
+        setMeta('twitter:title', title, true);
+        setMeta('twitter:description', description, true);
+        setMeta('twitter:image', image, true);
     }
     
     isLoading.value = false;
